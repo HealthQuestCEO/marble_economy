@@ -55,6 +55,38 @@
             display: none;
         }
 
+        /* Status indicator */
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1001;
+        }
+
+        .status-online {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-offline {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .status-syncing {
+            background: #ed8936;
+            color: white;
+        }
+
+        .status-error {
+            background: #e53e3e;
+            color: white;
+        }
+
         /* Navigation Tabs */
         .nav-tabs {
             display: flex;
@@ -395,33 +427,6 @@
             color: #4a5568;
         }
 
-        /* Status indicator */
-        .status-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 1001;
-        }
-
-        .status-online {
-            background: #48bb78;
-            color: white;
-        }
-
-        .status-offline {
-            background: #e53e3e;
-            color: white;
-        }
-
-        .status-syncing {
-            background: #ed8936;
-            color: white;
-        }
-
         /* Chores & Rewards */
         .category-section {
             margin-bottom: 30px;
@@ -631,7 +636,7 @@
     </style>
 </head>
 <body>
-    <div id="statusIndicator" class="status-indicator status-offline">Offline</div>
+    <div id="statusIndicator" class="status-indicator status-offline">Local Only</div>
     
     <div class="app-container">
         <header class="header">
@@ -653,7 +658,7 @@
                 <input type="text" id="githubRepo" placeholder="yourusername/marble-economy-data">
             </div>
             <button class="btn btn-primary" onclick="setupGitHubStorage()">Connect GitHub</button>
-            <button class="btn btn-warning" onclick="useLocalStorage()">Use Local Storage (Demo Mode)</button>
+            <button class="btn btn-warning" onclick="useLocalStorage()">Use Local Storage Only</button>
         </div>
 
         <nav class="nav-tabs">
@@ -756,7 +761,7 @@
                     </div>
                 </div>
 
-                <div class="dashboard-card">
+                <div class="dashboard-card" id="dataManagementCard" style="display: none;">
                     <h3>☁️ Data Management</h3>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button class="btn btn-primary" onclick="manualSync()">Sync Now</button>
@@ -949,17 +954,33 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
         document.addEventListener('DOMContentLoaded', init);
 
         async function init() {
-            checkStorageConfig();
-            await loadData();
-            checkInitialState();
-            renderChores();
-            renderRewards();
-            renderHistory();
-            updateLastSyncTime();
-            
-            // Auto-sync every 5 minutes if using GitHub
-            if (storageConfig.type === 'github') {
-                setInterval(autoSync, 5 * 60 * 1000);
+            console.log('Initializing app...');
+            try {
+                checkStorageConfig();
+                await loadData();
+                migrateDataStructure();
+                checkInitialState();
+                renderChores();
+                renderRewards();
+                renderHistory();
+                updateLastSyncTime();
+                
+                // Auto-sync every 5 minutes if using GitHub
+                if (storageConfig.type === 'github') {
+                    setInterval(autoSync, 5 * 60 * 1000);
+                }
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('Error during initialization:', error);
+                // Fall back to local storage on any error
+                storageConfig.type = 'local';
+                updateStatus('offline');
+                loadFromLocalStorage();
+                migrateDataStructure();
+                checkInitialState();
+                renderChores();
+                renderRewards();
+                renderHistory();
             }
         }
 
@@ -967,10 +988,19 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
         function checkStorageConfig() {
             const savedConfig = localStorage.getItem('marbleStorageConfig');
             if (savedConfig) {
-                storageConfig = JSON.parse(savedConfig);
-                if (storageConfig.type === 'github') {
-                    document.getElementById('githubSetup').classList.add('hidden');
-                    updateStatus('online');
+                try {
+                    storageConfig = JSON.parse(savedConfig);
+                    if (storageConfig.type === 'github') {
+                        document.getElementById('githubSetup').classList.add('hidden');
+                        document.getElementById('dataManagementCard').style.display = 'block';
+                        updateStatus('online');
+                    } else {
+                        updateStatus('offline');
+                    }
+                } catch (error) {
+                    console.error('Error parsing storage config:', error);
+                    storageConfig.type = 'local';
+                    updateStatus('offline');
                 }
             }
         }
@@ -996,6 +1026,7 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
 
             localStorage.setItem('marbleStorageConfig', JSON.stringify(storageConfig));
             document.getElementById('githubSetup').classList.add('hidden');
+            document.getElementById('dataManagementCard').style.display = 'block';
             updateStatus('online');
             alert('GitHub storage connected! Data will now sync automatically.');
         }
@@ -1049,7 +1080,14 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
             } else {
                 loadFromLocalStorage();
             }
+        }
 
+        function loadFromLocalStorage() {
+            kids = JSON.parse(localStorage.getItem('marbleKids')) || [];
+            transactions = JSON.parse(localStorage.getItem('marbleTransactions')) || [];
+        }
+
+        function migrateDataStructure() {
             // Migrate existing kids data structure
             kids.forEach(kid => {
                 if (!Array.isArray(kid.goals)) {
@@ -1068,11 +1106,6 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
                     kid.bankMarbles = 0;
                 }
             });
-        }
-
-        function loadFromLocalStorage() {
-            kids = JSON.parse(localStorage.getItem('marbleKids')) || [];
-            transactions = JSON.parse(localStorage.getItem('marbleTransactions')) || [];
         }
 
         async function saveData() {
@@ -1251,23 +1284,6 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
             reader.readAsText(file);
         }
 
-        // Confetti animation
-        function fireConfetti() {
-            const confettiContainer = document.getElementById('confetti');
-            confettiContainer.innerHTML = '';
-            for (let i = 0; i < 50; i++) {
-                const piece = document.createElement('div');
-                piece.className = 'confetti-piece';
-                piece.style.left = `${Math.random() * 100}vw`;
-                piece.style.animationDelay = `${Math.random() * 1.5}s`;
-                piece.style.backgroundColor = getRandomMarbleColor();
-                confettiContainer.appendChild(piece);
-            }
-            setTimeout(() => {
-                confettiContainer.innerHTML = '';
-            }, 3000);
-        }
-
         function checkInitialState() {
             const kidsView = document.getElementById('kids');
             const parentDashboard = document.getElementById('parent');
@@ -1284,6 +1300,23 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
                 renderParentDashboard();
                 showTab('kids');
             }
+        }
+
+        // Confetti animation
+        function fireConfetti() {
+            const confettiContainer = document.getElementById('confetti');
+            confettiContainer.innerHTML = '';
+            for (let i = 0; i < 50; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = `${Math.random() * 100}vw`;
+                piece.style.animationDelay = `${Math.random() * 1.5}s`;
+                piece.style.backgroundColor = getRandomMarbleColor();
+                confettiContainer.appendChild(piece);
+            }
+            setTimeout(() => {
+                confettiContainer.innerHTML = '';
+            }, 3000);
         }
 
         // Tab navigation
@@ -1542,6 +1575,17 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
         // Render History
         function renderHistory() {
             const historyList = document.getElementById('historyList');
+            const filterKid = document.getElementById('filterKid');
+            
+            // Update filter dropdown
+            filterKid.innerHTML = '<option value="">All Kids</option>';
+            kids.forEach(kid => {
+                const option = document.createElement('option');
+                option.value = kid.id;
+                option.textContent = kid.name;
+                filterKid.appendChild(option);
+            });
+            
             historyList.innerHTML = '';
             
             transactions.forEach(tx => {
@@ -1633,6 +1677,8 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
             }
             
             const kid = kids.find(k => k.id === kidId);
+            if (!kid) return;
+            
             const goalsToReorder = kid.goals.filter(g => g.status !== 'completed');
 
             goalsToReorder.forEach((goal, index) => {
@@ -1713,6 +1759,10 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
                 saveData();
                 renderKidsView();
                 renderParentDashboard();
+                
+                // Clear the form
+                document.getElementById('marbleAmount').value = '';
+                document.getElementById('marbleReason').value = '';
             } else {
                 alert('Please select a kid and enter a positive amount.');
             }
@@ -1737,6 +1787,10 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
                     saveData();
                     renderKidsView();
                     renderParentDashboard();
+                    
+                    // Clear the form
+                    document.getElementById('marbleAmount').value = '';
+                    document.getElementById('marbleReason').value = '';
                 } else {
                     alert('Not enough active marbles to remove!');
                 }
@@ -1780,6 +1834,8 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
                     saveData();
                 }
 
+                // Clear the input
+                document.getElementById(`saveInput-${kidId}`).value = '';
                 setTimeout(renderKidsView, 800);
             } else {
                 alert('Invalid amount or not enough active marbles.');
@@ -1801,6 +1857,9 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
                     reason: 'Withdrew from bank'
                 });
                 saveData();
+                
+                // Clear the input
+                document.getElementById(`withdrawInput-${kidId}`).value = '';
                 renderKidsView();
             } else {
                 alert('Invalid amount or not enough marbles in the bank.');
@@ -1871,46 +1930,6 @@ Devices off 8:30 weekdays, 10:00pm weekends`;
         // Modal functions
         function closeModal() {
             document.getElementById('confirmModal').classList.remove('active');
-        }
-
-        // Initialize filter dropdowns when history is rendered
-        function renderHistory() {
-            const historyList = document.getElementById('historyList');
-            const filterKid = document.getElementById('filterKid');
-            
-            // Update filter dropdown
-            filterKid.innerHTML = '<option value="">All Kids</option>';
-            kids.forEach(kid => {
-                const option = document.createElement('option');
-                option.value = kid.id;
-                option.textContent = kid.name;
-                filterKid.appendChild(option);
-            });
-            
-            historyList.innerHTML = '';
-            
-            transactions.forEach(tx => {
-                const kidName = kids.find(k => k.id === tx.kidId)?.name || 'N/A';
-                const txItem = document.createElement('div');
-                txItem.className = `transaction-item`;
-                
-                const typeClass = `type-${tx.type}`;
-                const amountText = tx.amount > 0 ? `+${tx.amount}` : tx.amount;
-                
-                txItem.innerHTML = `
-                    <div>
-                        <span class="transaction-type ${typeClass}">${tx.type}</span>
-                        <span>${kidName}</span>
-                    </div>
-                    <div>
-                        <span>${tx.reason}</span>
-                    </div>
-                    <div>
-                        <span>Marbles: ${amountText}</span>
-                    </div>
-                `;
-                historyList.appendChild(txItem);
-            });
         }
         
     </script>
