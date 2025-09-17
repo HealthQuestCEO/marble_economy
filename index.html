@@ -426,6 +426,10 @@
             background: linear-gradient(135deg, #ff6b6b, #ee5a24);
         }
 
+        .toast.info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
         @keyframes slideIn {
             from { transform: translateX(100%); }
             to { transform: translateX(0); }
@@ -689,11 +693,256 @@
     <div class="confetti-container" id="confettiContainer"></div>
 
     <script>
+        // GitHub Storage Integration
+        class GitHubStorage {
+            constructor(token, owner, repo) {
+                this.token = token;
+                this.owner = owner;
+                this.repo = repo;
+                this.apiBase = 'https://api.github.com';
+                this.dataFile = 'marble-data.json';
+            }
+
+            async saveToGitHub(data) {
+                try {
+                    const currentFile = await this.getCurrentFile();
+                    const content = btoa(JSON.stringify(data, null, 2));
+                    
+                    const body = {
+                        message: `Update marble data - ${new Date().toISOString()}`,
+                        content: content,
+                        branch: 'main'
+                    };
+
+                    if (currentFile && currentFile.sha) {
+                        body.sha = currentFile.sha;
+                    }
+
+                    const response = await fetch(
+                        `${this.apiBase}/repos/${this.owner}/${this.repo}/contents/${this.dataFile}`,
+                        {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${this.token}`,
+                                'Accept': 'application/vnd.github.v3+json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(body)
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`GitHub API error: ${response.status}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error saving to GitHub:', error);
+                    throw error;
+                }
+            }
+
+            async loadFromGitHub() {
+                try {
+                    const response = await fetch(
+                        `${this.apiBase}/repos/${this.owner}/${this.repo}/contents/${this.dataFile}`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${this.token}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        }
+                    );
+
+                    if (response.status === 404) {
+                        return null;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(`GitHub API error: ${response.status}`);
+                    }
+
+                    const fileData = await response.json();
+                    const content = atob(fileData.content);
+                    return JSON.parse(content);
+                } catch (error) {
+                    console.error('Error loading from GitHub:', error);
+                    throw error;
+                }
+            }
+
+            async getCurrentFile() {
+                try {
+                    const response = await fetch(
+                        `${this.apiBase}/repos/${this.owner}/${this.repo}/contents/${this.dataFile}`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${this.token}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        }
+                    );
+
+                    if (response.status === 404) {
+                        return null;
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    return null;
+                }
+            }
+        }
+
         // Data Management
         let kids = [];
         let chores = [];
         let rewards = [];
         let transactions = [];
+        let gitHubStorage;
+        let syncEnabled = false;
+
+        // Initialize GitHub storage
+        function initializeGitHubSync(token) {
+            gitHubStorage = new GitHubStorage(token, 'healthquestceo', 'marble_economy');
+            syncEnabled = true;
+            loadFromGitHub();
+        }
+
+        // Enhanced save function
+        async function saveData() {
+            const data = {
+                kids: kids,
+                chores: chores,
+                rewards: rewards,
+                transactions: transactions,
+                lastUpdated: new Date().toISOString()
+            };
+
+            // Save locally first (for offline access)
+            localStorage.setItem('marbleKids', JSON.stringify(kids));
+            localStorage.setItem('marbleChores', JSON.stringify(chores));
+            localStorage.setItem('marbleRewards', JSON.stringify(rewards));
+            localStorage.setItem('marbleTransactions', JSON.stringify(transactions));
+
+            // Save to GitHub if enabled
+            if (syncEnabled && gitHubStorage) {
+                try {
+                    await gitHubStorage.saveToGitHub(data);
+                    updateSyncIndicator('success');
+                } catch (error) {
+                    updateSyncIndicator('error');
+                    console.error('GitHub sync error:', error);
+                }
+            }
+        }
+
+        // Enhanced load function
+        async function loadFromGitHub() {
+            if (!syncEnabled || !gitHubStorage) {
+                return;
+            }
+
+            try {
+                updateSyncIndicator('loading');
+                const data = await gitHubStorage.loadFromGitHub();
+                
+                if (data) {
+                    kids = data.kids || [];
+                    chores = data.chores || getDefaultChores();
+                    rewards = data.rewards || getDefaultRewards();
+                    transactions = data.transactions || [];
+                    
+                    // Migrate data if needed
+                    kids.forEach(kid => {
+                        if (kid.bankMarbles === undefined) kid.bankMarbles = 0;
+                        if (!kid.goalLabel) kid.goalLabel = "My Goal";
+                        if (!kid.goalTarget) kid.goalTarget = 100;
+                        if (!kid.completedGoals) kid.completedGoals = [];
+                    });
+
+                    // Update UI
+                    renderKidsView();
+                    renderParentDashboard();
+                    renderChores();
+                    renderRewards();
+                    renderHistory();
+                    
+                    updateSyncIndicator('success');
+                } else {
+                    updateSyncIndicator('no-data');
+                }
+            } catch (error) {
+                updateSyncIndicator('error');
+                console.error('GitHub load error:', error);
+            }
+        }
+
+        // UI indicator functions
+        function updateSyncIndicator(status) {
+            const indicator = document.getElementById('syncIndicator');
+            if (!indicator) return;
+            
+            switch(status) {
+                case 'success':
+                    indicator.textContent = '🌐 GitHub Sync: Connected';
+                    indicator.style.background = 'linear-gradient(135deg, #4ecdc4, #44a08d)';
+                    break;
+                case 'error':
+                    indicator.textContent = '⚠️ GitHub Sync: Error';
+                    indicator.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a24)';
+                    break;
+                case 'loading':
+                    indicator.textContent = '🔄 GitHub Sync: Loading...';
+                    indicator.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+                    break;
+                case 'no-data':
+                    indicator.textContent = '🌐 GitHub Sync: No Data Found';
+                    indicator.style.background = 'linear-gradient(135deg, #95a5a6, #7f8c8d)';
+                    break;
+            }
+        }
+
+        function addSyncIndicator() {
+            const navBar = document.querySelector('.nav-bar');
+            const syncIndicator = document.createElement('div');
+            syncIndicator.id = 'syncIndicator';
+            syncIndicator.style.cssText = `
+                margin-top: 10px;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                text-align: center;
+                font-weight: 600;
+                color: white;
+            `;
+            
+            if (syncEnabled) {
+                syncIndicator.textContent = '🌐 GitHub Sync: Enabled';
+                syncIndicator.style.background = 'linear-gradient(135deg, #4ecdc4, #44a08d)';
+            } else {
+                syncIndicator.textContent = '💾 Local Storage Only';
+                syncIndicator.style.background = '#f39c12';
+            }
+            
+            navBar.appendChild(syncIndicator);
+        }
+
+        function addManualSyncButton() {
+            const syncButton = document.createElement('button');
+            syncButton.textContent = '🔄 Sync';
+            syncButton.className = 'btn';
+            syncButton.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 1000; font-size: 12px; padding: 8px 16px;';
+            syncButton.onclick = async () => {
+                if (syncEnabled) {
+                    await saveData();
+                } else {
+                    showToast('GitHub sync not enabled', 'error');
+                }
+            };
+            
+            document.body.appendChild(syncButton);
+        }
 
         // Initialize default data
         function initializeData() {
@@ -770,13 +1019,6 @@
                 { id: 'weekend-activity', name: '🛝 Choose weekend activity', cost: 75, notes: 'Sleepover, bowling, etc' },
                 { id: 'cash-5', name: '💵 $5 cash', cost: 100, notes: 'Max per week' }
             ];
-        }
-
-        function saveData() {
-            localStorage.setItem('marbleKids', JSON.stringify(kids));
-            localStorage.setItem('marbleChores', JSON.stringify(chores));
-            localStorage.setItem('marbleRewards', JSON.stringify(rewards));
-            localStorage.setItem('marbleTransactions', JSON.stringify(transactions));
         }
 
         // Navigation
@@ -1155,9 +1397,6 @@
                     reason: `Goal achieved: ${kid.goalLabel}`,
                     details: completedGoal.id
                 });
-                
-                // Reset goal to a new one (or keep same target)
-                // You might want to prompt for a new goal here
                 
                 saveData();
                 renderKidsView();
@@ -1703,6 +1942,13 @@
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
             initializeData();
+            addSyncIndicator();
+            addManualSyncButton();
+            
+            // IMPORTANT: Uncomment and add your NEW GitHub token here
+            // After you revoke the old one and create a new one
+            // initializeGitHubSync(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);
+            
             renderKidsView();
             renderParentDashboard();
             renderChores();
