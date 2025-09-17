@@ -1820,7 +1820,7 @@
 
         function renderHistory() {
             // Update kid filter
-            const kidFilter = document.getElementById('historyKidFilter');
+            const kidFilter = document.getElementById ('historyKidFilter');
             kidFilter.innerHTML = '<option value="">All Kids</option>';
             kids.forEach(kid => {
                 kidFilter.innerHTML += `<option value="${kid.id}">${kid.name}</option>`;
@@ -1945,7 +1945,7 @@
             addSyncIndicator();
             addManualSyncButton();
             
-            initializeGitHubSync(ghp_11BTTPT5Q0GGpNxU01lv0S_S16wF5ra1fkbwVVjrC2eVNvyZ0nbCI9jU5eU4fJuqsnJ3PZTW3GxPxqVzph);
+            initializeGitHubSync('ghp_11BTTPT5Q0GGpNxU01lv0S_S16wF5ra1fkbwVVjrC2eVNvyZ0nbCI9jU5eU4fJuqsnJ3PZTW3GxPxqVzph');
             
             renderKidsView();
             renderParentDashboard();
