@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marble Economy</title>
+    <title>Lumo's Land Marble Economy</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #06B6D4 0%, #14B8A6 50%, #6EE7B7 100%);
             min-height: 100vh;
             color: #333;
         }
@@ -41,7 +41,7 @@
         }
 
         .nav-tab {
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            background: linear-gradient(135deg, #06B6D4, #0D9488);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -54,13 +54,13 @@
 
         .nav-tab:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.5);
         }
 
         .nav-tab.active {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(135deg, #FB923C, #F97316);
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 4px 15px rgba(251, 146, 60, 0.5);
         }
 
         /* Content Sections */
@@ -99,7 +99,7 @@
         .kid-name {
             font-size: 24px;
             font-weight: bold;
-            color: #4ecdc4;
+            color: #0D9488;
             margin-bottom: 15px;
         }
 
@@ -114,7 +114,7 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.3) 100%);
-            border: 4px solid #4ecdc4;
+            border: 4px solid #14B8A6;
             border-radius: 15px 15px 25px 25px;
             position: relative;
             overflow: hidden;
@@ -138,28 +138,28 @@
         }
 
         .stat-box {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+            background: linear-gradient(135deg, #A7F3D0 0%, #6EE7B7 100%);
+            color: #1E3A8A;
             padding: 12px;
             border-radius: 12px;
             font-weight: bold;
         }
 
-        .stat-box.active { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
-        .stat-box.bank { background: linear-gradient(135deg, #ffd700, #ff8c00); }
-        .stat-box.total { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .stat-box.active { background: linear-gradient(135deg, #06B6D4, #0D9488); color: white; }
+        .stat-box.bank { background: linear-gradient(135deg, #FBBF24, #F97316); color: white; }
+        .stat-box.total { background: linear-gradient(135deg, #4A90E2, #2E5EAA); color: white; }
 
         .goal-section {
             margin: 20px 0;
             padding: 15px;
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(251, 191, 36, 0.15);
             border-radius: 12px;
-            border: 2px solid #ffd700;
+            border: 2px solid #FBBF24;
         }
 
         .goal-name {
             font-weight: bold;
-            color: #ff8c00;
+            color: #EA580C;
             margin-bottom: 8px;
         }
 
@@ -174,7 +174,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            background: linear-gradient(90deg, #FBBF24, #F97316);
             border-radius: 10px;
             transition: width 0.5s ease;
             position: relative;
@@ -205,13 +205,13 @@
         .bank-controls input {
             flex: 1;
             padding: 10px;
-            border: 2px solid #4ecdc4;
+            border: 2px solid #14B8A6;
             border-radius: 8px;
             font-size: 16px;
         }
 
         .btn {
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            background: linear-gradient(135deg, #06B6D4, #0D9488);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -224,15 +224,15 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.5);
         }
 
         .btn.danger {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(135deg, #FB923C, #F97316);
         }
 
         .btn.success {
-            background: linear-gradient(135deg, #2ed573, #1e90ff);
+            background: linear-gradient(135deg, #6EE7B7, #34D399);
         }
 
         /* Parent Dashboard */
@@ -253,9 +253,9 @@
         .card-title {
             font-size: 18px;
             font-weight: bold;
-            color: #4ecdc4;
+            color: #0D9488;
             margin-bottom: 15px;
-            border-bottom: 2px solid #4ecdc4;
+            border-bottom: 2px solid #14B8A6;
             padding-bottom: 8px;
         }
 
@@ -281,7 +281,7 @@
 
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
-            border-color: #4ecdc4;
+            border-color: #14B8A6;
         }
 
         /* Chores */
@@ -290,7 +290,7 @@
         }
 
         .category-title {
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            background: linear-gradient(135deg, #06B6D4, #0D9488);
             color: white;
             padding: 12px 20px;
             border-radius: 10px;
@@ -310,7 +310,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 4px solid #4ecdc4;
+            border-left: 4px solid #14B8A6;
         }
 
         .chore-info {
@@ -323,12 +323,12 @@
         }
 
         .chore-value {
-            color: #4ecdc4;
+            color: #0D9488;
             font-weight: bold;
         }
 
         .award-btn {
-            background: linear-gradient(135deg, #2ed573, #1e90ff);
+            background: linear-gradient(135deg, #6EE7B7, #34D399);
             color: white;
             border: none;
             padding: 8px 16px;
@@ -357,12 +357,12 @@
         }
 
         .reward-card:hover {
-            border-color: #4ecdc4;
+            border-color: #14B8A6;
             transform: translateY(-5px);
         }
 
         .reward-cost {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            background: linear-gradient(135deg, #FBBF24, #F97316);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -413,7 +413,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            background: linear-gradient(135deg, #06B6D4, #0D9488);
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
@@ -423,11 +423,11 @@
         }
 
         .toast.error {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(135deg, #FB923C, #F97316);
         }
 
         .toast.info {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #4A90E2, #2E5EAA);
         }
 
         @keyframes slideIn {
@@ -483,7 +483,7 @@
         }
 
         .rules-toggle {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #4A90E2, #2E5EAA);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -509,13 +509,13 @@
         }
 
         .history-table th {
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            background: linear-gradient(135deg, #06B6D4, #0D9488);
             color: white;
             font-weight: 600;
         }
 
         .history-table tr:hover {
-            background: rgba(78, 205, 196, 0.1);
+            background: rgba(20, 184, 166, 0.1);
         }
     </style>
 </head>
@@ -536,8 +536,9 @@
         <div class="rules-panel">
             <button class="rules-toggle" onclick="toggleRules()">📜 House Rules & Guidelines</button>
             <div class="rules-content" id="rulesContent">
-                <h3>🏠 Family Marble Economy Rules</h3>
+                <h3>🏠 Lumo's Land Marble Economy Rules</h3>
                 <p><strong>Banking:</strong> Marbles roll over to next week. Save marbles in your bank to work toward goals!</p>
+                <p><strong>iPad Time:</strong> Maximum iPad time is ONLY allowed if all main daily chores are completed for the day!</p>
                 <p><strong>Screen Time:</strong> 1 hour M-F, 3 hours Sat-Sun. Complete all daily chores for half-price screen time!</p>
                 <p><strong>Devices Off:</strong> 8:30pm weekdays, 10:00pm weekends</p>
                 <p><strong>Respect:</strong> Feelings are always okay. Only disrespect costs marbles.</p>
@@ -611,6 +612,13 @@
                     <div style="display: flex; gap: 10px;">
                         <button class="btn" onclick="saveToBank()">Save to Bank</button>
                         <button class="btn" onclick="withdrawFromBank()">Withdraw from Bank</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3 class="card-title">🎁 Chores Completed Bonus</h3>
+                    <div id="halfPriceBonus">
+                        <!-- Half-price bonus control will be populated here -->
                     </div>
                 </div>
 
@@ -801,6 +809,10 @@
         let transactions = [];
         let gitHubStorage;
         let syncEnabled = false;
+        let isParentAuthenticated = false;
+        const PARENT_PASSWORD = 'lumo2024'; // Change this to your desired password
+        let halfPriceBonusActive = false;
+        let halfPriceBonusExpiry = null;
 
         // Initialize GitHub storage
         function initializeGitHubSync(token) {
@@ -944,6 +956,63 @@
             document.body.appendChild(syncButton);
         }
 
+        // Half-Price Bonus Management
+        function activateHalfPriceBonus() {
+            halfPriceBonusActive = true;
+            // Set expiry to next day at 6 AM
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(6, 0, 0, 0);
+            halfPriceBonusExpiry = tomorrow.toISOString();
+
+            localStorage.setItem('halfPriceBonusActive', 'true');
+            localStorage.setItem('halfPriceBonusExpiry', halfPriceBonusExpiry);
+
+            renderRewards();
+            renderParentDashboard();
+            showToast('🎉 Half-Price Bonus Activated! iPad time & playdates 50% off until tomorrow!', 'success');
+        }
+
+        function deactivateHalfPriceBonus() {
+            halfPriceBonusActive = false;
+            halfPriceBonusExpiry = null;
+            localStorage.removeItem('halfPriceBonusActive');
+            localStorage.removeItem('halfPriceBonusExpiry');
+
+            renderRewards();
+            renderParentDashboard();
+            showToast('Half-Price Bonus deactivated', 'info');
+        }
+
+        function checkHalfPriceBonus() {
+            const storedActive = localStorage.getItem('halfPriceBonusActive');
+            const storedExpiry = localStorage.getItem('halfPriceBonusExpiry');
+
+            if (storedActive === 'true' && storedExpiry) {
+                const expiryDate = new Date(storedExpiry);
+                const now = new Date();
+
+                if (now < expiryDate) {
+                    halfPriceBonusActive = true;
+                    halfPriceBonusExpiry = storedExpiry;
+                } else {
+                    // Bonus expired, clean up
+                    deactivateHalfPriceBonus();
+                }
+            }
+        }
+
+        function getRewardCost(reward) {
+            // Apply 50% discount to iPad time and playdate rewards
+            const discountableRewards = ['screen-', 'playdate'];
+            const isDiscountable = discountableRewards.some(keyword => reward.id.includes(keyword));
+
+            if (halfPriceBonusActive && isDiscountable) {
+                return Math.ceil(reward.cost / 2);
+            }
+            return reward.cost;
+        }
+
         // Initialize default data
         function initializeData() {
             // Load from localStorage or set defaults
@@ -951,6 +1020,9 @@
             chores = JSON.parse(localStorage.getItem('marbleChores')) || getDefaultChores();
             rewards = JSON.parse(localStorage.getItem('marbleRewards')) || getDefaultRewards();
             transactions = JSON.parse(localStorage.getItem('marbleTransactions')) || [];
+
+            // Check half-price bonus status
+            checkHalfPriceBonus();
 
             // Migrate existing kids to have bank and completed goals if they don't
             kids.forEach(kid => {
@@ -1023,20 +1095,35 @@
 
         // Navigation
         function switchTab(tabName) {
+            // Check if trying to access parent dashboard
+            if (tabName === 'parent' && !isParentAuthenticated) {
+                const enteredPassword = prompt('🔒 Parent Access Required\n\nEnter password to access admin controls:');
+                if (enteredPassword === PARENT_PASSWORD) {
+                    isParentAuthenticated = true;
+                    sessionStorage.setItem('parentAuth', 'true');
+                    showToast('Access granted! Welcome, Parent 👋');
+                } else if (enteredPassword !== null) {
+                    showToast('Incorrect password. Access denied.', 'error');
+                    return; // Don't switch tabs
+                } else {
+                    return; // User cancelled
+                }
+            }
+
             // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
             });
-            
+
             // Remove active from all tabs
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
+
             // Show selected section and activate tab
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
-            
+
             // Refresh content based on tab
             switch(tabName) {
                 case 'kids':
@@ -1480,21 +1567,23 @@
         function purchaseReward(rewardId, kidId) {
             const reward = rewards.find(r => r.id === rewardId);
             const kid = kids.find(k => k.id === kidId);
-            
+
             if (!reward || !kid) return;
-            
+
+            const actualCost = getRewardCost(reward);
             const totalMarbles = kid.activeMarbles + kid.bankMarbles;
-            if (totalMarbles < reward.cost) {
+            if (totalMarbles < actualCost) {
                 showToast('Not enough marbles for this reward', 'error');
                 return;
             }
-            
-            if (!confirm(`Purchase "${reward.name}" for ${reward.cost} marbles?`)) {
+
+            const discountText = actualCost < reward.cost ? ` (${actualCost} marbles - 50% OFF!)` : ` (${actualCost} marbles)`;
+            if (!confirm(`Purchase "${reward.name}"${discountText}?`)) {
                 return;
             }
-            
+
             // Spend active first, then bank
-            let remaining = reward.cost;
+            let remaining = actualCost;
             if (kid.activeMarbles >= remaining) {
                 kid.activeMarbles -= remaining;
             } else {
@@ -1502,21 +1591,21 @@
                 kid.activeMarbles = 0;
                 kid.bankMarbles -= remaining;
             }
-            
+
             transactions.push({
                 timestamp: new Date().toISOString(),
                 kidId: kidId,
                 type: 'purchase',
-                amount: reward.cost,
-                reason: `Purchased: ${reward.name}`,
+                amount: actualCost,
+                reason: `Purchased: ${reward.name}${actualCost < reward.cost ? ' (50% OFF)' : ''}`,
                 details: rewardId
             });
-            
+
             saveData();
             renderKidsView();
             renderRewards();
-            
-            showToast(`${kid.name} purchased ${reward.name}!`);
+
+            showToast(`${kid.name} purchased ${reward.name}!${actualCost < reward.cost ? ' 🎉' : ''}`);
         }
 
         // Animations
@@ -1566,13 +1655,13 @@
         }
 
         function getRandomMarbleColor() {
-            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
+            const colors = ['#06B6D4', '#14B8A6', '#0D9488', '#6EE7B7', '#34D399', '#A7F3D0', '#FBBF24', '#F97316', '#FB923C', '#4A90E2'];
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
         function playConfetti() {
             const container = document.getElementById('confettiContainer');
-            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+            const colors = ['#06B6D4', '#14B8A6', '#6EE7B7', '#FBBF24', '#F97316', '#FB923C'];
             
             for (let i = 0; i < 50; i++) {
                 setTimeout(() => {
@@ -1683,7 +1772,7 @@
                     select.innerHTML += `<option value="${kid.id}">${kid.name}</option>`;
                 });
             });
-            
+
             // Update kids list
             const kidsList = document.getElementById('kidsList');
             kidsList.innerHTML = '';
@@ -1699,13 +1788,36 @@
                 `;
                 kidsList.appendChild(kidDiv);
             });
-            
+
+            // Update half-price bonus controls
+            const bonusContainer = document.getElementById('halfPriceBonus');
+            if (halfPriceBonusActive) {
+                const expiryDate = new Date(halfPriceBonusExpiry);
+                bonusContainer.innerHTML = `
+                    <div style="padding: 15px; background: linear-gradient(135deg, #6EE7B7, #34D399); border-radius: 12px; color: white; text-align: center; margin-bottom: 15px;">
+                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">✨ BONUS ACTIVE ✨</div>
+                        <div style="font-size: 14px;">iPad time & playdates are 50% off!</div>
+                        <div style="font-size: 12px; margin-top: 8px; opacity: 0.9;">Expires: ${expiryDate.toLocaleString()}</div>
+                    </div>
+                    <button class="btn danger" onclick="deactivateHalfPriceBonus()" style="width: 100%;">Deactivate Bonus</button>
+                `;
+            } else {
+                bonusContainer.innerHTML = `
+                    <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
+                        When all daily chores are completed, activate this bonus to give 50% off iPad time and playdates until tomorrow!
+                    </p>
+                    <button class="btn success" onclick="activateHalfPriceBonus()" style="width: 100%;">
+                        🎉 Activate Half-Price Bonus
+                    </button>
+                `;
+            }
+
             // Update family stats
             const stats = document.getElementById('familyStats');
             const totalActive = kids.reduce((sum, kid) => sum + kid.activeMarbles, 0);
             const totalBank = kids.reduce((sum, kid) => sum + kid.bankMarbles, 0);
             const totalMarbles = totalActive + totalBank;
-            
+
             stats.innerHTML = `
                 <div style="display: grid; gap: 15px;">
                     <div class="stat-box">👥 Kids: ${kids.length}</div>
@@ -1788,20 +1900,35 @@
         function renderRewards() {
             const container = document.getElementById('rewardsGrid');
             container.innerHTML = '';
-            
+
+            // Add bonus indicator if active
+            if (halfPriceBonusActive) {
+                const bonusBanner = document.createElement('div');
+                bonusBanner.style.cssText = 'grid-column: 1 / -1; padding: 15px; background: linear-gradient(135deg, #6EE7B7, #34D399); border-radius: 12px; color: white; text-align: center; font-weight: bold; margin-bottom: 10px;';
+                bonusBanner.innerHTML = '🎉 BONUS ACTIVE: iPad Time & Playdates are 50% OFF! 🎉';
+                container.appendChild(bonusBanner);
+            }
+
             rewards.forEach(reward => {
                 const rewardCard = document.createElement('div');
                 rewardCard.className = 'reward-card';
-                
+
+                const actualCost = getRewardCost(reward);
+                const isDiscounted = actualCost < reward.cost;
+
                 // Check affordability for each kid
-                const affordableKids = kids.filter(kid => (kid.activeMarbles + kid.bankMarbles) >= reward.cost);
-                
+                const affordableKids = kids.filter(kid => (kid.activeMarbles + kid.bankMarbles) >= actualCost);
+
                 rewardCard.innerHTML = `
-                    <div class="reward-cost">${reward.cost} marbles</div>
+                    <div class="reward-cost">
+                        ${isDiscounted ? `<span style="text-decoration: line-through; opacity: 0.6; font-size: 12px;">${reward.cost}</span><br>` : ''}
+                        ${actualCost} marbles
+                        ${isDiscounted ? '<div style="font-size: 11px; margin-top: 4px;">⚡ 50% OFF</div>' : ''}
+                    </div>
                     <div class="reward-name">${reward.name}</div>
                     <div style="color: #666; font-size: 12px; margin-bottom: 15px;">${reward.notes}</div>
                     ${affordableKids.length > 0 ? `
-                        <div style="margin-bottom: 10px; font-weight: bold; color: #4ecdc4;">
+                        <div style="margin-bottom: 10px; font-weight: bold; color: #0D9488;">
                             Available for: ${affordableKids.map(k => k.name).join(', ')}
                         </div>
                         ${affordableKids.map(kid => `
@@ -1813,7 +1940,7 @@
                         <div style="color: #999; font-style: italic;">Not affordable yet</div>
                     `}
                 `;
-                
+
                 container.appendChild(rewardCard);
             });
         }
@@ -1941,21 +2068,28 @@
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
+            // Restore parent authentication from session
+            if (sessionStorage.getItem('parentAuth') === 'true') {
+                isParentAuthenticated = true;
+            }
+
             initializeData();
             addSyncIndicator();
             addManualSyncButton();
-            
-            initializeGitHubSync('ghp_11BTTPT5Q0GGpNxU01lv0S_S16wF5ra1fkbwVVjrC2eVNvyZ0nbCI9jU5eU4fJuqsnJ3PZTW3GxPxqVzph');
-            
+
+            // Optional: Initialize GitHub sync with your token
+            // You can set this via parent dashboard or keep it disabled for local-only storage
+            // initializeGitHubSync('YOUR_GITHUB_TOKEN_HERE');
+
             renderKidsView();
             renderParentDashboard();
             renderChores();
             renderRewards();
-            
+
             // Add event listeners for filters
             document.getElementById('historyKidFilter').addEventListener('change', renderHistory);
             document.getElementById('historyTypeFilter').addEventListener('change', renderHistory);
-            
+
             // Play intro animation
             setTimeout(() => {
                 kids.forEach(kid => {
