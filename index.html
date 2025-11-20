@@ -630,6 +630,52 @@
                 </div>
 
                 <div class="dashboard-card">
+                    <h3 class="card-title">🧹 Manage Chores</h3>
+                    <div class="form-group">
+                        <label>Chore Name</label>
+                        <input type="text" id="choreName" placeholder="e.g., 🛏 Make bed">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="choreCategory">
+                            <option value="Morning">Morning</option>
+                            <option value="After School">After School</option>
+                            <option value="Evening">Evening</option>
+                            <option value="Weekend">Weekend</option>
+                            <option value="Extra">Extra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Marble Value</label>
+                        <input type="number" id="choreValue" placeholder="1-5" min="1" max="10">
+                    </div>
+                    <button class="btn" onclick="addChore()">Add Chore</button>
+                    <div id="choresList" style="margin-top: 15px; max-height: 300px; overflow-y: auto;">
+                        <!-- Chores list will be populated here -->
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3 class="card-title">🎁 Manage Rewards</h3>
+                    <div class="form-group">
+                        <label>Reward Name</label>
+                        <input type="text" id="parentRewardName" placeholder="e.g., 🎉 Extra playtime">
+                    </div>
+                    <div class="form-group">
+                        <label>Cost (marbles)</label>
+                        <input type="number" id="parentRewardCost" placeholder="25" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes (optional)</label>
+                        <input type="text" id="parentRewardNotes" placeholder="e.g., Weekends only">
+                    </div>
+                    <button class="btn" onclick="addRewardFromParent()">Add Reward</button>
+                    <div id="rewardsList" style="margin-top: 15px; max-height: 300px; overflow-y: auto;">
+                        <!-- Rewards list will be populated here -->
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
                     <h3 class="card-title">🏆 Completed Goals</h3>
                     <div id="completedGoals">
                         <!-- Completed goals will be populated here -->
@@ -1499,27 +1545,68 @@
         }
 
         // Chore System
+        function addChore() {
+            const name = document.getElementById('choreName').value.trim();
+            const category = document.getElementById('choreCategory').value;
+            const marbleValue = parseInt(document.getElementById('choreValue').value);
+
+            if (!name || !category || !marbleValue || marbleValue <= 0) {
+                showToast('Please fill in all chore fields', 'error');
+                return;
+            }
+
+            const newChore = {
+                id: 'custom-' + Date.now().toString(),
+                name: name,
+                category: category,
+                marbleValue: marbleValue,
+                dailyMax: null
+            };
+
+            chores.push(newChore);
+            saveData();
+
+            // Clear form
+            document.getElementById('choreName').value = '';
+            document.getElementById('choreValue').value = '';
+
+            renderChores();
+            renderParentDashboard();
+            showToast('Chore added successfully!');
+        }
+
+        function removeChore(choreId) {
+            if (!confirm('Are you sure you want to remove this chore?')) return;
+
+            chores = chores.filter(c => c.id !== choreId);
+            saveData();
+
+            renderChores();
+            renderParentDashboard();
+            showToast('Chore removed successfully');
+        }
+
         function awardChore(choreId) {
             const chore = chores.find(c => c.id === choreId);
             if (!chore) return;
-            
+
             // Show kid selector modal (simplified - using prompt for now)
             const kidNames = kids.map(k => k.name);
             if (kidNames.length === 0) {
                 showToast('No kids added yet', 'error');
                 return;
             }
-            
+
             const selectedKidName = prompt(`Award "${chore.name}" (${chore.marbleValue} marbles) to:\n\n` + kidNames.map((name, i) => `${i + 1}. ${name}`).join('\n') + '\n\nEnter number:');
-            
+
             if (!selectedKidName || isNaN(selectedKidName)) return;
-            
+
             const kidIndex = parseInt(selectedKidName) - 1;
             if (kidIndex < 0 || kidIndex >= kids.length) return;
-            
+
             const kid = kids[kidIndex];
             kid.activeMarbles += chore.marbleValue;
-            
+
             transactions.push({
                 timestamp: new Date().toISOString(),
                 kidId: kid.id,
@@ -1528,11 +1615,11 @@
                 reason: `Chore completed: ${chore.name}`,
                 details: choreId
             });
-            
+
             saveData();
             animateMarbleAdd(kid.id, chore.marbleValue);
             renderKidsView();
-            
+
             showToast(`Awarded ${chore.marbleValue} marbles to ${kid.name} for ${chore.name}`);
         }
 
@@ -1540,28 +1627,69 @@
         function addReward() {
             const name = document.getElementById('newRewardName').value.trim();
             const cost = parseInt(document.getElementById('newRewardCost').value);
-            
+
             if (!name || !cost || cost <= 0) {
                 showToast('Please enter valid reward name and cost', 'error');
                 return;
             }
-            
+
             const newReward = {
                 id: Date.now().toString(),
                 name: name,
                 cost: cost,
                 notes: 'Custom'
             };
-            
+
             rewards.push(newReward);
             saveData();
             renderRewards();
-            
+
             // Clear form
             document.getElementById('newRewardName').value = '';
             document.getElementById('newRewardCost').value = '';
-            
+
             showToast('Reward added successfully!');
+        }
+
+        function addRewardFromParent() {
+            const name = document.getElementById('parentRewardName').value.trim();
+            const cost = parseInt(document.getElementById('parentRewardCost').value);
+            const notes = document.getElementById('parentRewardNotes').value.trim() || 'Custom';
+
+            if (!name || !cost || cost <= 0) {
+                showToast('Please enter valid reward name and cost', 'error');
+                return;
+            }
+
+            const newReward = {
+                id: 'custom-' + Date.now().toString(),
+                name: name,
+                cost: cost,
+                notes: notes
+            };
+
+            rewards.push(newReward);
+            saveData();
+
+            // Clear form
+            document.getElementById('parentRewardName').value = '';
+            document.getElementById('parentRewardCost').value = '';
+            document.getElementById('parentRewardNotes').value = '';
+
+            renderRewards();
+            renderParentDashboard();
+            showToast('Reward added successfully!');
+        }
+
+        function removeReward(rewardId) {
+            if (!confirm('Are you sure you want to remove this reward?')) return;
+
+            rewards = rewards.filter(r => r.id !== rewardId);
+            saveData();
+
+            renderRewards();
+            renderParentDashboard();
+            showToast('Reward removed successfully');
         }
 
         function purchaseReward(rewardId, kidId) {
@@ -1826,6 +1954,38 @@
                     <div class="stat-box total">🎯 Total Marbles: ${totalMarbles}</div>
                 </div>
             `;
+
+            // Update chores list
+            const choresList = document.getElementById('choresList');
+            if (chores.length === 0) {
+                choresList.innerHTML = '<p style="color: #666; text-align: center; font-style: italic; padding: 10px;">No chores added yet</p>';
+            } else {
+                choresList.innerHTML = chores.map(chore => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #14B8A6;">
+                        <div>
+                            <strong>${chore.name}</strong><br>
+                            <small style="color: #666;">${chore.category} • ${chore.marbleValue} marbles</small>
+                        </div>
+                        <button class="btn danger" onclick="removeChore('${chore.id}')" style="padding: 6px 12px; font-size: 12px;">Remove</button>
+                    </div>
+                `).join('');
+            }
+
+            // Update rewards list
+            const rewardsList = document.getElementById('rewardsList');
+            if (rewards.length === 0) {
+                rewardsList.innerHTML = '<p style="color: #666; text-align: center; font-style: italic; padding: 10px;">No rewards added yet</p>';
+            } else {
+                rewardsList.innerHTML = rewards.map(reward => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #FBBF24;">
+                        <div>
+                            <strong>${reward.name}</strong><br>
+                            <small style="color: #666;">${reward.cost} marbles • ${reward.notes}</small>
+                        </div>
+                        <button class="btn danger" onclick="removeReward('${reward.id}')" style="padding: 6px 12px; font-size: 12px;">Remove</button>
+                    </div>
+                `).join('');
+            }
             
             // Update completed goals
             const completedGoalsContainer = document.getElementById('completedGoals');
