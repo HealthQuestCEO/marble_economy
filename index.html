@@ -676,6 +676,30 @@
                 </div>
 
                 <div class="dashboard-card">
+                    <h3 class="card-title">🏆 Record Achieved Goal</h3>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Manually record a goal that was previously achieved but not tracked in the system.</p>
+                    <div class="form-group">
+                        <label>Select Kid</label>
+                        <select id="achievedGoalKidSelect">
+                            <option value="">Choose a kid...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Goal Name</label>
+                        <input type="text" id="achievedGoalName" placeholder="e.g., Camp Champions">
+                    </div>
+                    <div class="form-group">
+                        <label>Target Amount (marbles)</label>
+                        <input type="number" id="achievedGoalTarget" placeholder="120" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Date Achieved</label>
+                        <input type="date" id="achievedGoalDate">
+                    </div>
+                    <button class="btn success" onclick="recordAchievedGoal()">Record Goal Achievement</button>
+                </div>
+
+                <div class="dashboard-card">
                     <h3 class="card-title">🏆 Completed Goals</h3>
                     <div id="completedGoals">
                         <!-- Completed goals will be populated here -->
@@ -1506,7 +1530,7 @@
                 // Achievement!
                 playConfetti();
                 showToast(`🎉 ${kid.name} achieved their goal: ${kid.goalLabel}!`, 'success');
-                
+
                 // Record the completed goal
                 const completedGoal = {
                     goalName: kid.goalLabel,
@@ -1514,13 +1538,13 @@
                     completedDate: new Date().toISOString(),
                     id: Date.now().toString()
                 };
-                
+
                 if (!kid.completedGoals) kid.completedGoals = [];
                 kid.completedGoals.push(completedGoal);
-                
+
                 // Deduct the EXACT goal amount from bank
                 kid.bankMarbles -= kid.goalTarget;
-                
+
                 // Add achievement transaction
                 transactions.push({
                     timestamp: new Date().toISOString(),
@@ -1530,11 +1554,11 @@
                     reason: `Goal achieved: ${kid.goalLabel}`,
                     details: completedGoal.id
                 });
-                
+
                 saveData();
                 renderKidsView();
                 renderParentDashboard();
-                
+
                 // Ask if they want to set a new goal
                 setTimeout(() => {
                     if (confirm(`${kid.name} completed "${kid.goalLabel}"! Would you like to set a new goal?`)) {
@@ -1542,6 +1566,58 @@
                     }
                 }, 2000);
             }
+        }
+
+        function recordAchievedGoal() {
+            const kidId = document.getElementById('achievedGoalKidSelect').value;
+            const goalName = document.getElementById('achievedGoalName').value.trim();
+            const targetAmount = parseInt(document.getElementById('achievedGoalTarget').value);
+            const achievedDate = document.getElementById('achievedGoalDate').value;
+
+            if (!kidId || !goalName || !targetAmount || targetAmount <= 0 || !achievedDate) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            const kid = kids.find(k => k.id === kidId);
+            if (!kid) {
+                showToast('Kid not found', 'error');
+                return;
+            }
+
+            // Create completed goal record
+            const completedGoal = {
+                goalName: goalName,
+                targetAmount: targetAmount,
+                completedDate: new Date(achievedDate).toISOString(),
+                id: 'manual-' + Date.now().toString(),
+                manualEntry: true
+            };
+
+            if (!kid.completedGoals) kid.completedGoals = [];
+            kid.completedGoals.push(completedGoal);
+
+            // Add transaction for record keeping
+            transactions.push({
+                timestamp: new Date().toISOString(),
+                kidId: kid.id,
+                type: 'achievement',
+                amount: targetAmount,
+                reason: `Goal achieved (manual entry): ${goalName}`,
+                details: completedGoal.id
+            });
+
+            saveData();
+            renderParentDashboard();
+
+            // Clear form
+            document.getElementById('achievedGoalKidSelect').value = '';
+            document.getElementById('achievedGoalName').value = '';
+            document.getElementById('achievedGoalTarget').value = '';
+            document.getElementById('achievedGoalDate').value = '';
+
+            showToast(`✅ Recorded ${goalName} achievement for ${kid.name}!`, 'success');
+            playConfetti();
         }
 
         // Chore System
@@ -1892,7 +1968,7 @@
 
         function renderParentDashboard() {
             // Update kid selectors
-            const kidSelectors = ['marbleKidSelect', 'bankKidSelect'];
+            const kidSelectors = ['marbleKidSelect', 'bankKidSelect', 'achievedGoalKidSelect'];
             kidSelectors.forEach(selectorId => {
                 const select = document.getElementById(selectorId);
                 select.innerHTML = '<option value="">Choose a kid...</option>';
@@ -1989,24 +2065,29 @@
             
             // Update completed goals
             const completedGoalsContainer = document.getElementById('completedGoals');
-            const allCompletedGoals = kids.flatMap(kid => 
+            const allCompletedGoals = kids.flatMap(kid =>
                 (kid.completedGoals || []).map(goal => ({
                     ...goal,
                     kidName: kid.name,
                     kidId: kid.id
                 }))
             ).sort((a, b) => new Date(b.completedDate) - new Date(a.completedDate));
-            
+
             if (allCompletedGoals.length === 0) {
                 completedGoalsContainer.innerHTML = '<p style="color: #666; text-align: center; font-style: italic;">No goals completed yet</p>';
             } else {
                 completedGoalsContainer.innerHTML = `
-                    <div style="max-height: 300px; overflow-y: auto;">
+                    <div style="max-height: 400px; overflow-y: auto;">
                         ${allCompletedGoals.map(goal => `
-                            <div style="background: #f8f9fa; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid #ffd700;">
-                                <div style="font-weight: bold; color: #333;">${goal.goalName}</div>
-                                <div style="font-size: 12px; color: #666; margin-top: 4px;">
-                                    ${goal.kidName} • ${goal.targetAmount} marbles • ${new Date(goal.completedDate).toLocaleDateString()}
+                            <div style="background: #f8f9fa; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid ${goal.manualEntry ? '#FB923C' : '#ffd700'};">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <div style="font-weight: bold; color: #333;">${goal.goalName}</div>
+                                        <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                            ${goal.kidName} • ${goal.targetAmount} marbles • ${new Date(goal.completedDate).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    ${goal.manualEntry ? '<span style="background: #FB923C; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">MANUAL</span>' : ''}
                                 </div>
                             </div>
                         `).join('')}
